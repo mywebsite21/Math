@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Promise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0a0a23, #1e1e3f);
+            color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+            max-width: 700px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: #ffd700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 25px;
+            text-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+            animation: fadeIn 1.2s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(-20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .timer-circle {
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #ffd700, #b8860b);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #0a0a23;
+            font-size: 1.6rem;
+            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+            margin: 25px auto;
+            position: relative;
+            box-shadow: 0 15px 35px rgba(255, 215, 0, 0.5), inset 0 0 15px rgba(255, 215, 0, 0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: pulse 2.5s infinite;
+        }
+
+        .timer-circle::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            border-top-color: #00ddeb;
+            animation: spin 4s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.8); }
+            100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+        }
+
+        .timer-circle:hover {
+            transform: scale(1.08);
+            box-shadow: 0 20px 40px rgba(255, 215, 0, 0.7);
+        }
+
+        .timer-circle.active {
+            background: linear-gradient(145deg, #b8860b, #ffd700);
+            color: #fff;
+        }
+
+        #level {
+            font-size: 1.8rem;
+            color: #fff;
+            background: rgba(255, 215, 0, 0.15);
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 2px solid #ffd700;
+            transition: transform 0.3s ease;
+        }
+
+        #level:hover {
+            transform: translateY(-3px);
+        }
+
+        #congrats {
+            font-size: 1.3rem;
+            color: #28a745;
+            background: rgba(40, 167, 69, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 25px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        #congrats.show {
+            opacity: 1;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .instruction-button {
+            padding: 12px 35px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            background: linear-gradient(90deg, #ff4500, #ff8c00);
+            color: #fff;
+            box-shadow: 0 5px 15px rgba(255, 69, 0, 0.4);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .instruction-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255, 69, 0, 0.6);
+        }
+
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 999;
+        }
+
+        .popup, .instruction-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1e1e3f;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            z-index: 1000;
+            border: 2px solid #ffd700;
+        }
+
+        .popup h2, .instruction-popup h2 {
+            color: #ffd700;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .popup p, .instruction-popup p {
+            color: #e0e0e0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .instruction-popup ul {
+            text-align: left;
+            color: #e0e0e0;
+            font-size: 0.95rem;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            padding-left: 20px;
+        }
+
+        .instruction-popup ul li::before {
+            content: '✔';
+            color: #28a745;
+            margin-right: 10px;
+        }
+
+        .popup button, .instruction-popup button {
+            background: linear-gradient(90deg, #ffd700, #b8860b);
+            color: #0a0a23;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .popup button:hover, .instruction-popup button:hover {
+            background: linear-gradient(90deg, #b8860b, #ffd700);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            .timer-circle {
+                width: 200px;
+                height: 200px;
+                font-size: 1.2rem;
+            }
+            .popup, .instruction-popup {
+                width: 95%;
+                padding: 20px;
+            }
+            #level {
+                font-size: 1.4rem;
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>My Promise</h1>
+        <div id="level">Level: 0</div>
+        <div id="timer" class="timer-circle">
+            <span>Click to Start</span>
+        </div>
+        <div class="button-container">
+            <button class="instruction-button" onclick="showInstructionPopup()">নির্দেশনা</button>
+        </div>
+        <div id="congrats"></div>
+    </div>
+    <div class="popup-overlay" id="overlay"></div>
+    <div class="popup" id="popup">
+        <h2>আপনার যাত্রা শুরু!</h2>
+        <p>প্রতিটি মুহূর্ত আপনার জয়ের গল্প। এই কাউন্টডাউন দেখায় আপনি কতদিন ধরে খারাপ অভ্যাস থেকে মুক্ত।</p>
+        <p>👉 একদিনের দৃঢ়তা শত দিনের পরিবর্তন আনে।<br>
+        👉 আজকের নিয়ন্ত্রণ আপনার ভবিষ্যৎকে শক্তিশালী করে।</p>
+        <p>আপনি একা নন। প্রতিটি সেকেন্ড আপনাকে শক্তিশালী ও আত্মবিশ্বাসী করে। মাস্টারবেশনের ক্ষতি থেকে মুক্ত হয়ে সফলতার পথে এগিয়ে যান।</p>
+        <button onclick="closePopup()">শুরু করুন</button>
+    </div>
+    <div class="popup-overlay" id="instruction-overlay"></div>
+    <div class="instruction-popup" id="instruction-popup">
+        <h2>নির্দেশনা</h2>
+        <ul>
+            <li>প্রতিদিন সকালে ঘুম থেকে উঠুন।</li>
+            <li>৬-৮ ঘন্টা ঘুমান।</li>
+            <li>দুধ, ডিম, কিসমিস, মধু, কলা খান ঘাটতি পূরণের জন্য।</li>
+            <li>নিজেকে ফ্রেশ রাখুন, সবার সাথে থাকুন। একা থাকলে নেতিবাচক চিন্তা আসতে পারে।</li>
+        </ul>
+        <p>নিয়ম মেনে চলুন, একটি সুন্দর জীবন পাবেন।</p>
+        <button onclick="closeInstructionPopup()">বন্ধ করুন</button>
+    </div>
+
+    <script>
+        const timerDisplay = document.getElementById('timer');
+        const levelDisplay = document.getElementById('level');
+        const congratsDisplay = document.getElementById('congrats');
+        const popup = document.getElementById('popup');
+        const overlay = document.getElementById('overlay');
+        const instructionPopup = document.getElementById('instruction-popup');
+        const instructionOverlay = document.getElementById('instruction-overlay');
+
+        let startTime = localStorage.getItem('startTime');
+        let timerInterval;
+
+        function showPopup() {
+            popup.style.display = 'block';
+            overlay.style.display = 'block';
+        }
+
+        function closePopup() {
+            popup.style.display = 'none';
+            overlay.style.display = 'none';
+            startTimer();
+        }
+
+        function showInstructionPopup() {
+            instructionPopup.style.display = 'block';
+            instructionOverlay.style.display = 'block';
+        }
+
+        function closeInstructionPopup() {
+            instructionPopup.style.display = 'none';
+            instructionOverlay.style.display = 'none';
+        }
+
+        function updateTimer() {
+            const now = new Date().getTime();
+            const elapsed = now - startTime;
+            const days = Math.floor(elapsed / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((elapsed % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
+            timerDisplay.innerHTML = `${days} দিন<br>${hours} ঘন্টা ${minutes} মিনিট`;
+            
+            const level = Math.min(Math.floor(days / 5) + 1, 100);
+            levelDisplay.textContent = `Level: ${level}`;
+            if (days > 0 && days % 5 === 0 && days <= 500) {
+                congratsDisplay.textContent = `অভিনন্দন! আপনার লেভেল ${level} হয়েছে!`;
+                congratsDisplay.classList.add('show');
+            } else {
+                congratsDisplay.classList.remove('show');
+            }
+        }
+
+        function startTimer() {
+            if (!startTime) {
+                startTime = new Date().getTime();
+                localStorage.setItem('startTime', startTime);
+            }
+            timerDisplay.classList.add('active');
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        timerDisplay.addEventListener('click', () => {
+            if (!startTime) {
+                startTimer();
+            }
+        });
+
+        window.onload = () => {
+            showPopup();
+            if (startTime) {
+                timerDisplay.classList.add('active');
+                updateTimer();
+                timerInterval = setInterval(updateTimer, 1000);
+            }
+        };
+    </script>
+</body>
+</html>
