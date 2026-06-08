@@ -1,0 +1,6 @@
+{
+  "name": "Affiliate System Panel",
+  "description": "Multi-admin registration system and affiliate tracking dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
